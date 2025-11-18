@@ -1,33 +1,74 @@
+<!-- index.html -->
 <!doctype html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <title>URL Shortener</title>
-  <style>body{font-family:system-ui;padding:2rem;max-width:700px;margin:auto}</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>URL Shortener — Polished UI</title>
+  <link rel="stylesheet" href="/main.css">
 </head>
 <body>
-  <h1>Shorten URL</h1>
-  <form id="f">
-    <input id="url" placeholder="https://example.com/very/long" style="width:100%" required>
-    <button>Shorten</button>
-  </form>
-  <p id="out"></p>
-  <script>
-    document.getElementById('f').onsubmit = async e => {
-      e.preventDefault();
-      const originalUrl = document.getElementById('url').value;
-      const res = await fetch('/api/shorten', {
-        method:'POST',
-        headers:{'content-type':'application/json'},
-        body: JSON.stringify({ originalUrl })
-      });
-      const data = await res.json();
-      if (res.ok) {
-        document.getElementById('out').innerHTML = 'Short URL: <a href="'+data.shortUrl+'">'+data.shortUrl+'</a>';
-      } else {
-        document.getElementById('out').textContent = data.error || JSON.stringify(data);
-      }
-    }
-  </script>
+  <div class="container">
+    <div class="card">
+      <div class="header">
+        <div class="logo" aria-hidden>
+          <!-- simple link icon -->
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+            <path d="M10.59 13.41a2 2 0 0 1 0-2.82l3-3a2 2 0 0 1 2.82 2.82l-1.3 1.3" stroke="rgba(255,255,255,0.95)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M13.41 10.59a2 2 0 0 1 0 2.82l-3 3a2 2 0 0 1-2.82-2.82l1.3-1.3" stroke="rgba(255,255,255,0.95)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div style="flex:1;min-width:0">
+          <h1 class="title">URL Shortener</h1>
+          <p class="subtitle">Create clean, memorable short links instantly — secure & lightning fast.</p>
+        </div>
+        <div class="chip-list" aria-hidden>
+          <div class="chip" data-example="https://example.com/very/long">example.com</div>
+          <div class="chip" data-example="https://news.site/article/1234">news.site</div>
+          <div class="chip" data-example="https://your.community/post/abc">community</div>
+        </div>
+      </div>
+
+      <form id="f" class="form" autocomplete="off">
+        <div class="input-wrap">
+          <label for="url">Paste a long URL</label>
+          <input id="url" name="url" type="url" inputmode="url" placeholder="https://example.com/very/long/path?with=params" required />
+        </div>
+
+        <div class="controls">
+          <button type="submit" class="btn btn-primary" id="shortenBtn">
+            <span id="btnLabel">Shorten</span>
+            <span id="btnSpinner" style="display:none" aria-hidden class="spinner"></span>
+          </button>
+
+          <button type="button" class="btn btn-ghost" id="clearBtn" title="Clear input">Clear</button>
+        </div>
+
+        <p class="hint">Tip: Click any example to paste it into the input. Works offline for demo mode.</p>
+      </form>
+
+      <div id="outArea" style="display:none">
+        <div class="result" id="resultCard">
+          <div>
+            <div class="small meta">Short URL</div>
+            <div class="short" id="shortUrl"></div>
+            <div class="meta" id="originalMeta" style="margin-top:6px;color:var(--muted)"></div>
+          </div>
+          <div style="display:flex;gap:0.5rem;align-items:center">
+            <button class="btn btn-ghost" id="copyBtn">Copy</button>
+            <a id="openBtn" class="btn btn-primary" href="#" target="_blank" rel="noopener">Open</a>
+          </div>
+        </div>
+
+        <p class="notice">Note: This UI expects a POST endpoint at <code>/api/shorten</code> that returns JSON <code>{"shortUrl": "https://sho.rt/abc123"}</code>. If a network call fails, the UI will generate a demo short link locally for preview.</p>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="toast" class="toast" style="display:none" role="status" aria-live="polite"></div>
+
+  <script src="/main.js" defer></script>
 </body>
 </html>
+
