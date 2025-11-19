@@ -1,57 +1,77 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>URL Shortener</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Minimal URL Shortener</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="container">
-    <h1>Shorten a URL</h1>
+  <div class="card">
+    <h1>URL Shortener</h1>
 
     <form id="shortenForm">
-      <input type="text" id="longUrl" placeholder="Enter long URL..." required />
+      <input id="longUrl" type="text" placeholder="Enter URL (e.g. google.com or /home)" required />
       <button type="submit">Shorten</button>
     </form>
 
     <div id="result" class="hidden">
-      <p>Your short URL:</p>
-      <a id="shortUrl" href="#" target="_blank"></a>
+      <p>Short URL:</p>
+      <div class="result-row">
+        <a id="shortLink" href="#" target="_blank" rel="noopener"></a>
+        <button id="copyBtn">Copy</button>
+      </div>
+      <p id="message" class="muted"></p>
     </div>
   </div>
 
   <script>
-    const form = document.getElementById("shortenForm");
-    const longUrlInput = document.getElementById("longUrl");
-    const result = document.getElementById("result");
-    const shortUrl = document.getElementById("shortUrl");
+    const form = document.getElementById('shortenForm');
+    const longUrlInput = document.getElementById('longUrl');
+    const result = document.getElementById('result');
+    const shortLink = document.getElementById('shortLink');
+    const copyBtn = document.getElementById('copyBtn');
+    const message = document.getElementById('message');
 
-    form.addEventListener("submit", async (e) => {
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
+      result.classList.add('hidden');
+      message.textContent = '';
 
       const longUrl = longUrlInput.value.trim();
       if (!longUrl) return;
 
       try {
-        const res = await fetch("/shorten", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ longUrl }),
+        const res = await fetch('/shorten', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ longUrl })
         });
 
         const data = await res.json();
-        if (data.code) {
-          const finalShort = `${window.location.origin}/${data.code}`;
-          shortUrl.href = finalShort;
-          shortUrl.innerText = finalShort;
-          result.classList.remove("hidden");
+        if (res.ok && data.shortUrl) {
+          shortLink.href = data.shortUrl;
+          shortLink.textContent = data.shortUrl;
+          result.classList.remove('hidden');
+          message.textContent = 'Click to open; copy to clipboard if you want.';
         } else {
-          alert("Error shortening URL");
+          message.textContent = data.error || 'Failed to shorten URL';
+          result.classList.remove('hidden');
         }
       } catch (err) {
-        alert("Server error");
+        message.textContent = 'Server error';
+        result.classList.remove('hidden');
       }
+    });
+
+    copyBtn.addEventListener('click', () => {
+      const url = shortLink.href;
+      if (!url) return;
+      navigator.clipboard?.writeText(url).then(() => {
+        message.textContent = 'Copied to clipboard';
+      }).catch(() => {
+        message.textContent = 'Unable to copy';
+      });
     });
   </script>
 </body>
